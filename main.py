@@ -75,9 +75,9 @@ def create_oxapay_payment(description, amount, currency='USD'):
         "description": description,
         "amount": amount,
         "currency": currency,
-        "callback_url: https://bot-telegram.onrender.com/callback.py",  # Substitua pelos URLs reais
-        "success_url: https://bot-telegram.onrender.com/success.html",
-        "cancel_url: https://bot-telegram.onrender.com/cancel.html"
+        "callback_url": "https://seuapp.herokuapp.com/callback",  # Substitua pelos URLs reais
+        "success_url": "https://seuapp.herokuapp.com/success.html",
+        "cancel_url": "https://seuapp.herokuapp.com/cancel.html"
     }
     response = requests.post(url, json=data, headers=headers)
     return response.json()
