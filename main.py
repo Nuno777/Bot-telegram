@@ -65,7 +65,7 @@ def buy(mensagem):
     bot.send_message(mensagem.chat.id, text)
 
 def create_oxapay_payment(description, amount, currency='USD'):
-    url = "https://api.oxapay.com/v1/payments"
+    url = "https://api.oxapay.com/v1/payments"  # Verifique se esta é a URL correta para a API
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {OXAPAY_API_KEY}"
@@ -75,12 +75,13 @@ def create_oxapay_payment(description, amount, currency='USD'):
         "description": description,
         "amount": amount,
         "currency": currency,
-        "callback_url": "https://seuapp.herokuapp.com/callback",  # Substitua pelo seu callback real
-        "success_url": "https://seuapp.herokuapp.com/success.html",  # Substitua pelo seu success URL real
-        "cancel_url": "https://seuapp.herokuapp.com/cancel.html"  # Substitua pelo seu cancel URL real
+        "callback_url: https://bot-telegram.onrender.com/callback.py",  # Substitua pelos URLs reais
+        "success_url: https://bot-telegram.onrender.com/success.html",
+        "cancel_url: https://bot-telegram.onrender.com/cancel.html"
     }
     response = requests.post(url, json=data, headers=headers)
     return response.json()
+
 
 @bot.message_handler(commands=["purchase"])
 def purchase(mensagem):
