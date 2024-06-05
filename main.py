@@ -1,5 +1,7 @@
 import telebot
 import requests
+import os
+from flask import Flask
 
 CHAVE_API = "7371479271:AAE6ECs-iIzeo_VV4BWMTq3Cg1jIK_uUHZs"
 OXAPAY_API_KEY = "OXAUwZmCgUDU9YBzNFGcZkRtvP"
@@ -145,4 +147,22 @@ Cryptocurrency prices /crypto
     """
     bot.send_message(mensagem.chat.id, text)
 
-bot.polling()
+# Crie uma aplicação Flask para manter o bot vivo
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return "Bot is running!"
+
+# Inicie o bot em uma thread separada
+import threading
+
+def start_bot():
+    bot.polling()
+
+threading.Thread(target=start_bot).start()
+
+# Execute a aplicação Flask na porta especificada pela variável de ambiente PORT
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
