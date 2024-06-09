@@ -1,4 +1,5 @@
 import telebot
+from telebot import types
 import requests
 import os
 from flask import Flask
@@ -132,6 +133,17 @@ def crypto(mensagem):
     """
     bot.send_message(mensagem.chat.id, text)
 
+@bot.callback_query_handler(func=lambda call: True)
+def callback_query(call):
+    if call.data == "buy_products":
+        bot.send_message(call.message.chat.id, "You clicked on Buy Products")
+    elif call.data == "show_products":
+        bot.send_message(call.message.chat.id, "You clicked on Show Products")
+    elif call.data == "crypto":
+        bot.send_message(call.message.chat.id, "You clicked on Crypto")
+    elif call.data == "support":
+        bot.send_message(call.message.chat.id, "You clicked on Support")
+
 @bot.message_handler(commands=["start"])
 def start(mensagem):
     first_name = mensagem.from_user.first_name
@@ -140,13 +152,24 @@ def start(mensagem):
 
 ELPato Services allows you to show some services that we offer for a certain cost, where you can buy them.
 
-Buy the services /buy
-Show services /show
-Cryptocurrency prices /crypto
+Choose an option below:
 
-👤 Support: @ElPato_Drops
+1. Buy Products
+2. Show Products
+3. Crypto
+4. Support
     """
-    bot.send_message(mensagem.chat.id, text)
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.row(
+        types.InlineKeyboardButton('Buy Products', callback_data='buy_products'),
+        types.InlineKeyboardButton('Show Products', callback_data='show_products')
+    )
+    keyboard.row(
+        types.InlineKeyboardButton('Crypto', callback_data='crypto'),
+        types.InlineKeyboardButton('Support', callback_data='support')
+    )
+
+    bot.send_message(mensagem.chat.id, text, reply_markup=keyboard)
 
 # Crie uma aplicação Flask para manter o bot vivo
 app = Flask(__name__)
