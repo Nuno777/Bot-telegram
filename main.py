@@ -136,11 +136,11 @@ def crypto(mensagem):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
     if call.data == "buy_products":
-        bot.send_message(call.message.chat.id, "/buy")
+        buy(call.message)
     elif call.data == "show_products":
-        bot.send_message(call.message.chat.id, "/show")
+        show(call.message)
     elif call.data == "crypto":
-        bot.send_message(call.message.chat.id, "/crypto")
+        crypto(call.message)
     elif call.data == "support":
         support_url = "https://t.me/ElPato_Drops"
         bot.send_message(call.message.chat.id, f"Click [here]({support_url}) to chat with support.", parse_mode="Markdown")
