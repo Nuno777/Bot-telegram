@@ -136,13 +136,14 @@ def crypto(mensagem):
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
     if call.data == "buy_products":
-        bot.send_message(call.message.chat.id, "You clicked on Buy Products")
+        bot.send_message(call.message.chat.id, "/buy")
     elif call.data == "show_products":
-        bot.send_message(call.message.chat.id, "You clicked on Show Products")
+        bot.send_message(call.message.chat.id, "/show")
     elif call.data == "crypto":
-        bot.send_message(call.message.chat.id, "You clicked on Crypto")
+        bot.send_message(call.message.chat.id, "/crypto")
     elif call.data == "support":
-        bot.send_message(call.message.chat.id, "You clicked on Support")
+        support_url = "https://t.me/ElPato_Drops"
+        bot.send_message(call.message.chat.id, f"Click [here]({support_url}) to chat with support.", parse_mode="Markdown")
 
 @bot.message_handler(commands=["start"])
 def start(mensagem):
@@ -152,12 +153,6 @@ def start(mensagem):
 
 ELPato Services allows you to show some services that we offer for a certain cost, where you can buy them.
 
-Choose an option below:
-
-1. Buy Products
-2. Show Products
-3. Crypto
-4. Support
     """
     keyboard = types.InlineKeyboardMarkup()
     keyboard.row(
