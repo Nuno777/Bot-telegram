@@ -82,7 +82,6 @@ def create_oxapay_payment(description, amount, currency='USD'):
     response = requests.post(url, json=data, headers=headers)
     return response.json()
 
-
 @bot.message_handler(commands=["purchase"])
 def purchase(mensagem):
     try:
@@ -135,8 +134,9 @@ def crypto(mensagem):
 
 @bot.message_handler(commands=["start"])
 def start(mensagem):
-    text = """
-💵 Welcome to ELPato Services
+    first_name = mensagem.from_user.first_name
+    text = f"""
+💵 Welcome to ELPato Services, {first_name}
 
 ELPato Services allows you to show some services that we offer for a certain cost, where you can buy them.
 
