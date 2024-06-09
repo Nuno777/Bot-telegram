@@ -171,7 +171,7 @@ app = Flask(__name__)
 
 @app.route('/')
 def index():
-    return "Bot is running!"
+    return "Duck running for dollars $$$"
 
 # Inicie o bot em uma thread separada
 import threading
