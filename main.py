@@ -136,7 +136,7 @@ def crypto(mensagem):
 def start(mensagem):
     first_name = mensagem.from_user.first_name
     text = f"""
-💵 Welcome to ELPato Services, {first_name}
+💵 Welcome {first_name} to ELPato Services
 
 ELPato Services allows you to show some services that we offer for a certain cost, where you can buy them.
 
