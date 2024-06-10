@@ -3,36 +3,24 @@ from telebot import types
 import requests
 import os
 from flask import Flask
-import threading
-from dotenv import load_dotenv
 
-# Carrega as variáveis do arquivo .env
-load_dotenv()
-
-# Segurança das Chaves de API
-CHAVE_API = os.getenv("TELEGRAM_API_KEY", "default_key")
-OXAPAY_API_KEY = os.getenv("OXAPAY_API_KEY", "default_key")
-OXAPAY_MERCHANT_ID = os.getenv("OXAPAY_MERCHANT_ID", "default_id")
+CHAVE_API = "7371479271:AAE6ECs-iIzeo_VV4BWMTq3Cg1jIK_uUHZs"
+OXAPAY_API_KEY = "OXAUwZmCgUDU9YBzNFGcZkRtvP"
+OXAPAY_MERCHANT_ID = "077PVV-8FK004-PUGZLP-KDC407"
 
 bot = telebot.TeleBot(CHAVE_API)
 
-# Tratamento de Erros ao Obter Preços das Criptomoedas
+# Função para obter os preços das criptomoedas
 def get_crypto_prices():
     url = "https://api.coingecko.com/api/v3/simple/price"
     params = {
         'ids': 'bitcoin,ethereum,usd-coin,litecoin,solana',
         'vs_currencies': 'usd'
     }
-    try:
-        response = requests.get(url, params=params)
-        response.raise_for_status()
-        data = response.json()
-        return data
-    except requests.RequestException as e:
-        print(f"Error fetching crypto prices: {e}")
-        return None
+    response = requests.get(url, params=params)
+    data = response.json()
+    return data
 
-# Funções de Comandos do Bot
 @bot.message_handler(commands=["drops"])
 def drops(mensagem):
     text = """
@@ -77,7 +65,6 @@ def buy(mensagem):
     """
     bot.send_message(mensagem.chat.id, text)
 
-# Tratamento de Erros ao Criar Pagamento Oxapay
 def create_oxapay_payment(description, amount, currency='USD'):
     url = "https://api.oxapay.com/v1/payments"
     headers = {
@@ -89,17 +76,12 @@ def create_oxapay_payment(description, amount, currency='USD'):
         "description": description,
         "amount": amount,
         "currency": currency,
-        "callback_url": "https://seuapp.render.com/callback",
+        "callback_url": "https://seuapp.render.com/callback",  # Substitua pelos URLs reais
         "success_url": "https://seuapp.render.com/success.html",
         "cancel_url": "https://seuapp.render.com/cancel.html"
     }
-    try:
-        response = requests.post(url, json=data, headers=headers)
-        response.raise_for_status()
-        return response.json()
-    except requests.RequestException as e:
-        print(f"Error creating Oxapay payment: {e}")
-        return None
+    response = requests.post(url, json=data, headers=headers)
+    return response.json()
 
 @bot.message_handler(commands=["purchase"])
 def purchase(mensagem):
@@ -119,7 +101,7 @@ def purchase(mensagem):
         
         payment_response = create_oxapay_payment(f"Purchase of {service}", price)
         
-        if payment_response and payment_response.get("status") == "success":
+        if payment_response.get("status") == "success":
             payment_url = payment_response.get("payment_url")
             bot.send_message(mensagem.chat.id, f"To complete your purchase, please proceed to the payment page: {payment_url}")
         else:
@@ -146,18 +128,15 @@ def show(mensagem):
 @bot.message_handler(commands=["crypto"])
 def crypto(mensagem):
     prices = get_crypto_prices()
-    if prices:
-        text = f"""
-        Current cryptocurrency prices:
-        - Bitcoin: ${prices['bitcoin']['usd']}
-        - Ethereum: ${prices['ethereum']['usd']}
-        - USD Coin: ${prices['usd-coin']['usd']}
-        - Litecoin: ${prices['litecoin']['usd']}
-        - Solana: ${prices['solana']['usd']}
-        """
-        bot.send_message(mensagem.chat.id, text)
-    else:
-        bot.send_message(mensagem.chat.id, "Unable to fetch crypto prices at the moment. Please try again later.")
+    text = f"""
+    Current cryptocurrency prices:
+    - Bitcoin: ${prices['bitcoin']['usd']}
+    - Ethereum: ${prices['ethereum']['usd']}
+    - USD Coin: ${prices['usd-coin']['usd']}
+    - Litecoin: ${prices['litecoin']['usd']}
+    - Solana: ${prices['solana']['usd']}
+    """
+    bot.send_message(mensagem.chat.id, text)
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
@@ -196,18 +175,22 @@ ELPato Services allows you to show some services that we offer for a certain cos
 
     bot.send_message(mensagem.chat.id, text, reply_markup=keyboard)
 
-# Uso do Flask para Manter o Bot Vivo
+# Crie uma aplicação Flask para manter o bot vivo
 app = Flask(__name__)
 
 @app.route('/')
 def index():
     return "Duck running for dollars $$$"
 
-# Uso de Threading para Iniciar o Bot
+# Inicie o bot em uma thread separada
+import threading
+
 def start_bot():
     bot.polling()
 
+threading.Thread(target=start_bot).start()
+
+# Execute a aplicação Flask na porta especificada pela variável de ambiente PORT
 if __name__ == "__main__":
-    threading.Thread(target=start_bot).start()
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
