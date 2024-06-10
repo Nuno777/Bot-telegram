@@ -1,8 +1,8 @@
 import telebot
 from telebot import types
 import requests
-from flask import Flask
 import os
+from flask import Flask, request
 
 CHAVE_API = "7371479271:AAE6ECs-iIzeo_VV4BWMTq3Cg1jIK_uUHZs"
 OXAPAY_API_KEY = "OXAUwZmCgUDU9YBzNFGcZkRtvP"
@@ -118,20 +118,7 @@ def show(mensagem):
 
     Residential Drops USA/CA /drops
     Serial Number /sn"""
-    keyboard = types.InlineKeyboardMarkup()
-    keyboard.row(
-        types.InlineKeyboardButton('View Drops', callback_data='view_drops'),
-        types.InlineKeyboardButton('View SN', callback_data='view_sn')
-    )
-    keyboard.row(
-        types.InlineKeyboardButton('Buy Services', callback_data='buy_services'),
-        types.InlineKeyboardButton('Show Services', callback_data='show_services')
-    )
-    keyboard.row(
-        types.InlineKeyboardButton('Crypto', callback_data='crypto'),
-        types.InlineKeyboardButton('Support', callback_data='support')
-    )
-    bot.send_message(mensagem.chat.id, text, reply_markup=keyboard)
+    bot.send_message(mensagem.chat.id, text)
 
 @bot.message_handler(commands=["crypto"])
 def crypto(mensagem):
@@ -157,10 +144,6 @@ def callback_query(call):
     elif call.data == "support":
         support_url = "https://t.me/ElPato_Drops"
         bot.send_message(call.message.chat.id, f"Click [here]({support_url}) to chat with support.", parse_mode="Markdown")
-    elif call.data == "view_drops":
-        drops(call.message)
-    elif call.data == "view_sn":
-        sn(call.message)
 
 @bot.message_handler(commands=["start"])
 def start(mensagem):
@@ -186,9 +169,15 @@ ELPato Services allows you to show some services that we offer for a certain cos
 # Crie uma aplicação Flask para manter o bot vivo
 app = Flask(__name__)
 
-@app.route('/')
+@app.route('/', methods=['POST', 'GET'])
 def index():
-    return "Duck running for dollars $$$"
+    if request.method == 'POST':
+        json_str = request.get_data().decode('utf-8')
+        update = telebot.types.Update.de_json(json_str)
+        bot.process_new_updates([update])
+        return '', 200
+    else:
+        return "Duck running for dollars $$$"
 
 # Inicie o bot em uma thread separada
 import threading
@@ -198,7 +187,4 @@ def start_bot():
 
 threading.Thread(target=start_bot).start()
 
-# Execute a aplicação Flask na porta especificada pela variável de ambiente PORT
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+# Certifique-se de que o app Flask é acessível
