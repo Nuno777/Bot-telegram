@@ -200,5 +200,4 @@ threading.Thread(target=start_bot).start()
 
 # Execute a aplicação Flask na porta especificada pela variável de ambiente PORT
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+   app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
