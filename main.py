@@ -123,14 +123,6 @@ def show(mensagem):
         types.InlineKeyboardButton('View Drops', callback_data='view_drops'),
         types.InlineKeyboardButton('View SN', callback_data='view_sn')
     )
-    keyboard.row(
-        types.InlineKeyboardButton('Buy Services', callback_data='buy_services'),
-        types.InlineKeyboardButton('Show Services', callback_data='show_services')
-    )
-    keyboard.row(
-        types.InlineKeyboardButton('Crypto', callback_data='crypto'),
-        types.InlineKeyboardButton('Support', callback_data='support')
-    )
     bot.send_message(mensagem.chat.id, text, reply_markup=keyboard)
 
 @bot.message_handler(commands=["crypto"])
