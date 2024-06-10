@@ -77,7 +77,7 @@ def create_oxapay_payment(description, amount, currency='USD'):
         "amount": amount,
         "currency": currency,
         "callback_url": "https://seuapp.render.com/callback",  # Substitua pelos URLs reais
-        "success_url": "https://seuapp.render.com/success.html",
+        "success_url": "https://success-32ub.onrender.com",
         "cancel_url": "https://seuapp.render.com/cancel.html"
     }
     response = requests.post(url, json=data, headers=headers)
