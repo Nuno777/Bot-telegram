@@ -66,7 +66,7 @@ def buy(mensagem):
     bot.send_message(mensagem.chat.id, text)
 
 def create_oxapay_payment(description, amount, currency='USD'):
-    url = "https://api.oxapay.com/v1/payments"  # Verifique se esta é a URL correta para a API
+    url = "https://api.oxapay.com/v1/payments"
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {OXAPAY_API_KEY}"
@@ -76,9 +76,9 @@ def create_oxapay_payment(description, amount, currency='USD'):
         "description": description,
         "amount": amount,
         "currency": currency,
-        "callback_url": "https://seuapp.herokuapp.com/callback",  # Substitua pelos URLs reais
-        "success_url": "https://seuapp.herokuapp.com/success.html",
-        "cancel_url": "https://seuapp.herokuapp.com/cancel.html"
+        "callback_url": "https://seuapp.render.com/callback",  # Substitua pelos URLs reais
+        "success_url": "https://seuapp.render.com/success.html",
+        "cancel_url": "https://seuapp.render.com/cancel.html"
     }
     response = requests.post(url, json=data, headers=headers)
     return response.json()
@@ -185,5 +185,3 @@ threading.Thread(target=start_bot).start()
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
-
-bot.polling()
