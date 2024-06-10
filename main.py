@@ -68,7 +68,7 @@ def buy(mensagem):
 def create_oxapay_payment(description, amount, currency='USD', life_time=30, fee_paid_by_payer=0, under_paid_cover=2.5, callback_url='https://example.com/callback', return_url='https://example.com/success', order_id='', email=''):
     url = 'https://api.oxapay.com/merchants/request'
     data = {
-        'merchant': OXAPAY_MERCHANT_API_KEY,
+        'merchant': OXAPAY_MERCHANT_ID,
         'amount': amount,
         'currency': currency,
         'lifeTime': life_time,
