@@ -3,7 +3,6 @@ from telebot import types
 import requests
 import os
 from flask import Flask
-import json
 
 CHAVE_API = "7371479271:AAE6ECs-iIzeo_VV4BWMTq3Cg1jIK_uUHZs"
 OXAPAY_API_KEY = "W30BRR-XEDNYM-T0Y1Y8-LWZT2D"
@@ -61,30 +60,28 @@ def buy(mensagem):
     3 Drops - $190
     Drops Painel - $800
     
-    To buy a service, use the command /purchase followed by the service name and quantity.
-    Example: /purchase Drop 1
+    Para comprar um serviço, use o comando /purchase seguido do nome do serviço e quantidade.
+    Exemplo: /purchase Drop 1
     """
     bot.send_message(mensagem.chat.id, text)
 
-def create_oxapay_payment(description, amount, currency='USD', life_time=30, fee_paid_by_payer=0, under_paid_cover=2.5, callback_url='https://example.com/callback', return_url='https://example.com/success', order_id='', email=''):
-    url = 'https://api.oxapay.com/merchants/request'
-    data = {
-        'merchant': OXAPAY_MERCHANT_ID,
-        'amount': amount,
-        'currency': currency,
-        'lifeTime': life_time,
-        'feePaidByPayer': fee_paid_by_payer,
-        'underPaidCover': under_paid_cover,
-        'callbackUrl': callback_url,
-        'returnUrl': return_url,
-        'description': description,
-        'orderId': order_id,
-        'email': email
+def create_oxapay_payment(description, amount, currency='USD'):
+    url = "https://api.oxapay.com/merchants/request"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {OXAPAY_API_KEY}"
     }
-
-    response = requests.post(url, data=json.dumps(data))
-    result = response.json()
-    return result
+    data = {
+        "merchant_id": OXAPAY_MERCHANT_ID,
+        "description": description,
+        "amount": amount,
+        "currency": currency,
+        "callback_url": "https://seuapp.render.com/callback",  # Substitua pelos URLs reais
+        "success_url": "https://success-32ub.onrender.com",
+        "cancel_url": "https://seuapp.render.com/cancel.html"
+    }
+    response = requests.post(url, json=data, headers=headers)
+    return response.json()
 
 @bot.message_handler(commands=["purchase"])
 def purchase(mensagem):
@@ -99,25 +96,25 @@ def purchase(mensagem):
         elif service.lower() == "drops_painel":
             price = 800 * quantity
         else:
-            bot.send_message(mensagem.chat.id, "Service not recognized. Please try again.")
+            bot.send_message(mensagem.chat.id, "Serviço não reconhecido. Por favor, tente novamente.")
             return
         
         payment_response = create_oxapay_payment(f"Purchase of {service}", price)
         
         if payment_response.get("status") == "success":
             payment_url = payment_response.get("payment_url")
-            bot.send_message(mensagem.chat.id, f"To complete your purchase, please proceed to the payment page: {payment_url}")
+            bot.send_message(mensagem.chat.id, f"Para completar sua compra, por favor prossiga para a página de pagamento: {payment_url}")
         else:
-            bot.send_message(mensagem.chat.id, "There was an issue creating the payment. Please try again later.")
+            bot.send_message(mensagem.chat.id, "Houve um problema ao criar o pagamento. Por favor, tente novamente mais tarde.")
     except ValueError:
-        bot.send_message(mensagem.chat.id, "Invalid command format. Use /purchase followed by the service name and quantity.")
+        bot.send_message(mensagem.chat.id, "Formato de comando inválido. Use /purchase seguido do nome do serviço e quantidade.")
     except Exception as e:
-        bot.send_message(mensagem.chat.id, f"An error occurred: {str(e)}")
+        bot.send_message(mensagem.chat.id, f"Ocorreu um erro: {str(e)}")
 
 @bot.message_handler(commands=["show"])
 def show(mensagem):
     text = """
-    Our services
+    Nossos serviços
 
     Residential Drops USA/CA
     Serial Numbers"""
@@ -132,7 +129,7 @@ def show(mensagem):
 def crypto(mensagem):
     prices = get_crypto_prices()
     text = f"""
-    Current cryptocurrency prices:
+    Preços atuais das criptomoedas:
     - Bitcoin: ${prices['bitcoin']['usd']}
     - Ethereum: ${prices['ethereum']['usd']}
     - USD Coin: ${prices['usd-coin']['usd']}
@@ -151,7 +148,7 @@ def callback_query(call):
         crypto(call.message)
     elif call.data == "support":
         support_url = "https://t.me/ElPato_Drops"
-        bot.send_message(call.message.chat.id, f"Click [here]({support_url}) to chat with support.", parse_mode="Markdown")
+        bot.send_message(call.message.chat.id, f"Clique [aqui]({support_url}) para conversar com o suporte.", parse_mode="Markdown")
     elif call.data == "view_drops":
         drops(call.message)
     elif call.data == "view_sn":
@@ -161,19 +158,19 @@ def callback_query(call):
 def start(mensagem):
     first_name = mensagem.from_user.first_name
     text = f"""
-💵 Welcome {first_name} to ELPato Services
+💵 Bem-vindo {first_name} aos Serviços ELPato
 
-ELPato Services allows you to show some services that we offer for a certain cost, where you can buy them.
+Os Serviços ELPato permitem que você veja alguns serviços que oferecemos por um determinado custo, onde você pode comprá-los.
 
     """
     keyboard = types.InlineKeyboardMarkup()
     keyboard.row(
-        types.InlineKeyboardButton('Buy Services', callback_data='buy_services'),
-        types.InlineKeyboardButton('Show Services', callback_data='show_services')
+        types.InlineKeyboardButton('Comprar Serviços', callback_data='buy_services'),
+        types.InlineKeyboardButton('Mostrar Serviços', callback_data='show_services')
     )
     keyboard.row(
-        types.InlineKeyboardButton('Crypto', callback_data='crypto'),
-        types.InlineKeyboardButton('Support', callback_data='support')
+        types.InlineKeyboardButton('Cripto', callback_data='crypto'),
+        types.InlineKeyboardButton('Suporte', callback_data='support')
     )
 
     bot.send_message(mensagem.chat.id, text, reply_markup=keyboard)
@@ -192,8 +189,3 @@ def start_bot():
     bot.polling()
 
 threading.Thread(target=start_bot).start()
-
-# Execute a aplicação Flask na porta especificada pela variável de ambiente PORT
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
