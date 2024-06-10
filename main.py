@@ -118,7 +118,20 @@ def show(mensagem):
 
     Residential Drops USA/CA /drops
     Serial Number /sn"""
-    bot.send_message(mensagem.chat.id, text)
+    keyboard = types.InlineKeyboardMarkup()
+    keyboard.row(
+        types.InlineKeyboardButton('View Drops', callback_data='view_drops'),
+        types.InlineKeyboardButton('View SN', callback_data='view_sn')
+    )
+    keyboard.row(
+        types.InlineKeyboardButton('Buy Services', callback_data='buy_services'),
+        types.InlineKeyboardButton('Show Services', callback_data='show_services')
+    )
+    keyboard.row(
+        types.InlineKeyboardButton('Crypto', callback_data='crypto'),
+        types.InlineKeyboardButton('Support', callback_data='support')
+    )
+    bot.send_message(mensagem.chat.id, text, reply_markup=keyboard)
 
 @bot.message_handler(commands=["crypto"])
 def crypto(mensagem):
@@ -135,15 +148,19 @@ def crypto(mensagem):
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
-    if call.data == "buy_products":
+    if call.data == "buy_services":
         buy(call.message)
-    elif call.data == "show_products":
+    elif call.data == "show_services":
         show(call.message)
     elif call.data == "crypto":
         crypto(call.message)
     elif call.data == "support":
         support_url = "https://t.me/ElPato_Drops"
         bot.send_message(call.message.chat.id, f"Click [here]({support_url}) to chat with support.", parse_mode="Markdown")
+    elif call.data == "view_drops":
+        drops(call.message)
+    elif call.data == "view_sn":
+        sn(call.message)
 
 @bot.message_handler(commands=["start"])
 def start(mensagem):
@@ -156,8 +173,8 @@ ELPato Services allows you to show some services that we offer for a certain cos
     """
     keyboard = types.InlineKeyboardMarkup()
     keyboard.row(
-        types.InlineKeyboardButton('Buy Products', callback_data='buy_products'),
-        types.InlineKeyboardButton('Show Products', callback_data='show_products')
+        types.InlineKeyboardButton('Buy Services', callback_data='buy_services'),
+        types.InlineKeyboardButton('Show Services', callback_data='show_services')
     )
     keyboard.row(
         types.InlineKeyboardButton('Crypto', callback_data='crypto'),
