@@ -2,7 +2,7 @@ import telebot
 from telebot import types
 import requests
 import os
-from flask import Flask, request
+from flask import Flask
 
 CHAVE_API = "7371479271:AAE6ECs-iIzeo_VV4BWMTq3Cg1jIK_uUHZs"
 OXAPAY_API_KEY = "OXAUwZmCgUDU9YBzNFGcZkRtvP"
@@ -169,15 +169,9 @@ ELPato Services allows you to show some services that we offer for a certain cos
 # Crie uma aplicação Flask para manter o bot vivo
 app = Flask(__name__)
 
-@app.route('/', methods=['POST', 'GET'])
+@app.route('/')
 def index():
-    if request.method == 'POST':
-        json_str = request.get_data().decode('utf-8')
-        update = telebot.types.Update.de_json(json_str)
-        bot.process_new_updates([update])
-        return '', 200
-    else:
-        return "Duck running for dollars $$$"
+    return "Duck running for dollars $$$"
 
 # Inicie o bot em uma thread separada
 import threading
