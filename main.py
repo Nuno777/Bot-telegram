@@ -65,23 +65,25 @@ def buy(mensagem):
     """
     bot.send_message(mensagem.chat.id, text)
 
-def create_oxapay_payment(description, amount, currency='USD'):
-    url = "https://api.oxapay.com/v1/payments"
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {OXAPAY_API_KEY}"
-    }
+def create_oxapay_payment(description, amount, currency='USD', life_time=30, fee_paid_by_payer=0, under_paid_cover=2.5, callback_url='https://example.com/callback', return_url='https://example.com/success', order_id='', email=''):
+    url = 'https://api.oxapay.com/merchants/request'
     data = {
-        "merchant_id": OXAPAY_MERCHANT_ID,
-        "description": description,
-        "amount": amount,
-        "currency": currency,
-        "callback_url": "https://seuapp.render.com/callback",  # Substitua pelos URLs reais
-        "success_url": "https://success-32ub.onrender.com",
-        "cancel_url": "https://seuapp.render.com/cancel.html"
+        'merchant': OXAPAY_MERCHANT_API_KEY,
+        'amount': amount,
+        'currency': currency,
+        'lifeTime': life_time,
+        'feePaidByPayer': fee_paid_by_payer,
+        'underPaidCover': under_paid_cover,
+        'callbackUrl': callback_url,
+        'returnUrl': return_url,
+        'description': description,
+        'orderId': order_id,
+        'email': email
     }
-    response = requests.post(url, json=data, headers=headers)
-    return response.json()
+
+    response = requests.post(url, data=json.dumps(data))
+    result = response.json()
+    return result
 
 @bot.message_handler(commands=["purchase"])
 def purchase(mensagem):
