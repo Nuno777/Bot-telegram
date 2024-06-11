@@ -4,9 +4,9 @@ import requests
 import os
 from flask import Flask
 
-API_KEY = "7371479271:AAE6ECs-iIzeo_VV4BWMTq3Cg1jIK_uUHZs"
-OXAPAY_API_KEY = "W30BRR-XEDNYM-T0Y1Y8-LWZT2D"
-OXAPAY_MERCHANT_ID = "077PVV-8FK004-PUGZLP-KDC407"
+API_KEY = os.environ.get("TELEGRAM_API_KEY")
+OXAPAY_API_KEY = os.environ.get("OXAPAY_API_KEY")
+OXAPAY_MERCHANT_ID = os.environ.get("OXAPAY_MERCHANT_ID")
 
 bot = telebot.TeleBot(API_KEY)
 
