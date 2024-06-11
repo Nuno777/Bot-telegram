@@ -2,23 +2,17 @@ import telebot
 from telebot import types
 import requests
 import os
-from flask import Flask, request, jsonify
-import hmac
-import hashlib
-import json
+from flask import Flask
 import threading
 import time
 
-# Chaves de API do Telegram e do OXAPAY
 API_KEY = "7371479271:AAE6ECs-iIzeo_VV4BWMTq3Cg1jIK_uUHZs"
 OXAPAY_API_KEY = "W30BRR-XEDNYM-T0Y1Y8-LWZT2D"
 OXAPAY_MERCHANT_ID = "077PVV-8FK004-PUGZLP-KDC407"
 
-
-# Inicialização do bot Telegram
 bot = telebot.TeleBot(API_KEY)
 
-# Função para obter os preços das criptomoedas
+# Function to get cryptocurrency prices
 def get_crypto_prices():
     url = "https://api.coingecko.com/api/v3/simple/price"
     params = {
@@ -29,7 +23,6 @@ def get_crypto_prices():
     data = response.json()
     return data
 
-# Funções para manipular comandos do bot Telegram
 @bot.message_handler(commands=["drops"])
 def drops(message):
     text = """
@@ -167,43 +160,24 @@ ELPato Services allows you to view some of our offered services and their prices
 
     bot.send_message(message.chat.id, text, reply_markup=keyboard)
 
-# Inicialização da aplicação Flask
+# Create a Flask application to keep the bot alive
 app = Flask(__name__)
 
-# Função para processar callbacks de pagamento
-@app.route('/callback', methods=['POST'])
-def handle_callback():
-    post_data = request.get_data(as_text=True)
-    data = json.loads(post_data)
+@app.route('/')
+def index():
+    return "Duck running for dollars $$$"
 
-    # Selecionar a chave secreta correta com base no tipo de callback
-    if data['type'] == 'payment':
-        api_secret_key = OXAPAY_API_KEY
-    elif data['type'] == 'payout':
-        api_secret_key = 'X84AZ5-PAKSAF-5VD8YP-43NU89'
-    else:
-        return 'Invalid data type', 400
+# Function to periodically send a request to keep the app alive
+def keep_alive():
+    while True:
+        try:
+            requests.get("https://bot-telegram-yoym.onrender.com")
+            time.sleep(300)  # wait for 5 minutes
+        except Exception as e:
+            print(f"An error occurred: {e}")
 
-    hmac_header = request.headers.get('HMAC')
-    calculated_hmac = hmac.new(api_secret_key.encode(), post_data.encode(), hashlib.sha512).hexdigest()
-
-    # Validar a assinatura HMAC
-    if calculated_hmac == hmac_header:
-        # Assinatura HMAC é válida
-        if data['type'] == 'payment':
-            print('Received payment callback:', data)
-            # Processar os dados de pagamento aqui
-        elif data['type'] == 'payout':
-            print('Received payout callback:', data)
-            # Processar os dados de pagamento
-            # Processar os dados de pagamento de saída aqui
-        return 'OK', 200
-    else:
-        # Assinatura HMAC não é válida
-        return 'Invalid HMAC signature', 400
-
-# Função para manter o bot Telegram e a aplicação Flask em execução
-def run_bot_and_flask():
+# Start the bot and keep_alive functions in separate threads
+def start_bot():
     while True:
         try:
             bot.polling(none_stop=True, timeout=123)
@@ -211,7 +185,10 @@ def run_bot_and_flask():
             print(f"Bot polling failed: {e}")
             time.sleep(15)
 
-# Iniciar o bot Telegram e a aplicação Flask em threads separadas
+threading.Thread(target=start_bot).start()
+threading.Thread(target=keep_alive).start()
+
+# Run the Flask application on the port specified by the PORT environment variable
 if __name__ == "__main__":
-    threading.Thread(target=run_bot_and_flask).start()
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
