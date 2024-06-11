@@ -2,20 +2,16 @@ import telebot
 from telebot import types
 import requests
 import os
-from flask import Flask, request, jsonify
-import hmac
-import hashlib
-import json
+from flask import Flask
 import threading
 import time
+import json
 
-# Chaves de API do Telegram e do OXAPAY
 API_KEY = "7371479271:AAE6ECs-iIzeo_VV4BWMTq3Cg1jIK_uUHZs"
 OXAPAY_API_KEY = "W30BRR-XEDNYM-T0Y1Y8-LWZT2D"
 OXAPAY_MERCHANT_ID = "077PVV-8FK004-PUGZLP-KDC407"
+TRACK_ID = "unique_track_id"  # Substitua isso por um identificador único para cada transação
 
-
-# Inicialização do bot Telegram
 bot = telebot.TeleBot(API_KEY)
 
 # Função para obter os preços das criptomoedas
@@ -29,7 +25,20 @@ def get_crypto_prices():
     data = response.json()
     return data
 
-# Funções para manipular comandos do bot Telegram
+# Função para criar um pagamento com o provedor de pagamento OXAPAY
+def create_oxapay_payment(description, amount):
+    url = 'https://api.oxapay.com/payments/create'
+    data = {
+        'merchant': OXAPAY_MERCHANT_ID,
+        'amount': amount,
+        'description': description,
+        'trackId': TRACK_ID
+    }
+    response = requests.post(url, data=json.dumps(data))
+    result = response.json()
+    return result
+
+# Função para lidar com o comando /drops
 @bot.message_handler(commands=["drops"])
 def drops(message):
     text = """
@@ -40,6 +49,7 @@ def drops(message):
     Drops Panel - $800"""
     bot.send_message(message.chat.id, text)
 
+# Função para lidar com o comando /sn
 @bot.message_handler(commands=["sn"])
 def sn(message):
     text = """
@@ -59,6 +69,7 @@ def sn(message):
     Kitchenaid"""
     bot.send_message(message.chat.id, text)
 
+# Função para lidar com o comando /buy
 @bot.message_handler(commands=["buy"])
 def buy(message):
     text = """
@@ -74,6 +85,7 @@ def buy(message):
     """
     bot.send_message(message.chat.id, text)
 
+# Função para lidar com o comando /purchase
 @bot.message_handler(commands=["purchase"])
 def purchase(message):
     try:
@@ -102,6 +114,7 @@ def purchase(message):
     except Exception as e:
         bot.send_message(message.chat.id, f"An error occurred: {str(e)}")
 
+# Função para lidar com o comando /show
 @bot.message_handler(commands=["show"])
 def show(message):
     text = """
@@ -116,6 +129,7 @@ def show(message):
     )
     bot.send_message(message.chat.id, text, reply_markup=keyboard)
 
+# Função para lidar com o comando /crypto
 @bot.message_handler(commands=["crypto"])
 def crypto(message):
     prices = get_crypto_prices()
@@ -130,6 +144,7 @@ def crypto(message):
     """
     bot.send_message(message.chat.id, text)
 
+# Função para lidar com a consulta de callback
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
     if call.data == "buy_services":
@@ -146,6 +161,7 @@ def callback_query(call):
     elif call.data == "view_sn":
         sn(call.message)
 
+# Função para lidar com o comando /start
 @bot.message_handler(commands=["start"])
 def start(message):
     first_name = message.from_user.first_name
@@ -167,51 +183,20 @@ ELPato Services allows you to view some of our offered services and their prices
 
     bot.send_message(message.chat.id, text, reply_markup=keyboard)
 
-# Inicialização da aplicação Flask
+# Criar aplicativo Flask para manter o bot ativo
 app = Flask(__name__)
 
+# Rota raiz
 @app.route('/')
 def index():
     return "Duck running for dollars $$$"
 
-# Função para processar callbacks de pagamento
-@app.route('/callback', methods=['POST'])
-def handle_callback():
-    post_data = request.get_data(as_text=True)
-    data = json.loads(post_data)
-
-    # Selecionar a chave secreta correta com base no tipo de callback
-    if data['type'] == 'payment':
-        api_secret_key = OXAPAY_API_KEY
-    elif data['type'] == 'payout':
-        api_secret_key = 'X84AZ5-PAKSAF-5VD8YP-43NU89'
-    else:
-        return 'Invalid data type', 400
-
-    hmac_header = request.headers.get('HMAC')
-    calculated_hmac = hmac.new(api_secret_key.encode(), post_data.encode(), hashlib.sha512).hexdigest()
-
-    # Validar a assinatura HMAC
-    if calculated_hmac == hmac_header:
-        # Assinatura HMAC é válida
-        if data['type'] == 'payment':
-            print('Received payment callback:', data)
-            # Processar os dados de pagamento aqui
-        elif data['type'] == 'payout':
-            print('Received payout callback:', data)
-            # Processar os dados de pagamento
-            # Processar os dados de pagamento de saída aqui
-        return 'OK', 200
-    else:
-        # Assinatura HMAC não é válida
-        return 'Invalid HMAC signature', 400
-
-# Function to periodically send a request to keep the app alive
+# Função para manter o aplicativo Flask ativo
 def keep_alive():
     while True:
         try:
             requests.get("https://bot-telegram-yoym.onrender.com")
-            time.sleep(300)  # wait for 5 minutes
+            time.sleep(300)
         except Exception as e:
             print(f"An error occurred: {e}")
 
