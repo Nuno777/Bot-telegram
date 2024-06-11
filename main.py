@@ -112,10 +112,6 @@ def callback_query(call):
         drops(call.message)
     elif call.data == "view_sn":
         sn(call.message)
-    elif call.data == "buy_sn":
-        # Lógica para comprar serial number
-    elif call.data == "buy_drops_panel":
-        # Lógica para comprar drops panel
 
 @bot.message_handler(commands=["start"])
 def start(message):
