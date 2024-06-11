@@ -178,7 +178,12 @@ def keep_alive():
 
 # Start the bot and keep_alive functions in separate threads
 def start_bot():
-    bot.polling()
+    while True:
+        try:
+            bot.polling(none_stop=True, timeout=123)
+        except Exception as e:
+            print(f"Bot polling failed: {e}")
+            time.sleep(15)
 
 threading.Thread(target=start_bot).start()
 threading.Thread(target=keep_alive).start()
