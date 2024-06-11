@@ -33,7 +33,7 @@ def create_oxapay_payment(description, amount, order_id, email):
         'lifeTime': 30,
         'feePaidByPayer': 0,
         'underPaidCover': 2.5,
-        'callbackUrl': 'https://example.com/callback',
+        'callbackUrl': 'https://oxapay.com/pay/71030100',
         'returnUrl': 'https://example.com/success',
         'description': description,
         'orderId': order_id,
