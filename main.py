@@ -105,7 +105,7 @@ def purchase(message):
         payment_response = create_oxapay_payment(f"Purchase of {service}", price)
         
         if payment_response.get("status") == "success":
-            payment_url = payment_response.get("payment_url")
+            payment_url = payment_response.get("https://oxapay.com/pay/71030100")
             bot.send_message(message.chat.id, f"To complete your purchase, please proceed to the payment page: {payment_url}")
         else:
             bot.send_message(message.chat.id, "There was an issue creating the payment. Please try again later.")
