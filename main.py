@@ -3,6 +3,8 @@ from telebot import types
 import requests
 import os
 from flask import Flask
+import threading
+import time
 
 API_KEY = "7371479271:AAE6ECs-iIzeo_VV4BWMTq3Cg1jIK_uUHZs"
 OXAPAY_API_KEY = "W30BRR-XEDNYM-T0Y1Y8-LWZT2D"
@@ -112,6 +114,7 @@ def crypto(message):
     prices = get_crypto_prices()
     text = f"""
     Current cryptocurrency prices:
+    
     - Bitcoin: ${prices['bitcoin']['usd']}
     - Ethereum: ${prices['ethereum']['usd']}
     - USD Coin: ${prices['usd-coin']['usd']}
@@ -164,13 +167,21 @@ app = Flask(__name__)
 def index():
     return "Duck running for dollars $$$"
 
-# Start the bot in a separate thread
-import threading
+# Function to periodically send a request to keep the app alive
+def keep_alive():
+    while True:
+        try:
+            requests.get("https://bot-telegram-yoym.onrender.com")
+            time.sleep(300)  # wait for 5 minutes
+        except Exception as e:
+            print(f"An error occurred: {e}")
 
+# Start the bot and keep_alive functions in separate threads
 def start_bot():
     bot.polling()
 
 threading.Thread(target=start_bot).start()
+threading.Thread(target=keep_alive).start()
 
 # Run the Flask application on the port specified by the PORT environment variable
 if __name__ == "__main__":
