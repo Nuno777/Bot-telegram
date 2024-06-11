@@ -5,6 +5,7 @@ import os
 from flask import Flask
 import threading
 import time
+import json
 
 API_KEY = "7371479271:AAE6ECs-iIzeo_VV4BWMTq3Cg1jIK_uUHZs"
 OXAPAY_API_KEY = "W30BRR-XEDNYM-T0Y1Y8-LWZT2D"
@@ -22,6 +23,24 @@ def get_crypto_prices():
     response = requests.get(url, params=params)
     data = response.json()
     return data
+
+def create_oxapay_payment(description, amount, order_id, email):
+    url = 'https://api.oxapay.com/merchants/request'
+    data = {
+        'merchant': OXAPAY_API_KEY,
+        'amount': amount,
+        'currency': 'TRX',
+        'lifeTime': 30,
+        'feePaidByPayer': 0,
+        'underPaidCover': 2.5,
+        'callbackUrl': 'https://example.com/callback',
+        'returnUrl': 'https://example.com/success',
+        'description': description,
+        'orderId': order_id,
+        'email': email
+    }
+    response = requests.post(url, data=json.dumps(data))
+    return response.json()
 
 @bot.message_handler(commands=["drops"])
 def drops(message):
@@ -65,6 +84,10 @@ def buy(message):
     keyboard = types.InlineKeyboardMarkup()
     keyboard.row(
         types.InlineKeyboardButton('Serial Number', callback_data='buy_sn'),
+        types.InlineKeyboardButton('1 Drop', callback_data='buy_1_drop')
+    )
+    keyboard.row(
+        types.InlineKeyboardButton('3 Drops', callback_data='buy_3_drops'),
         types.InlineKeyboardButton('Drops Panel', callback_data='buy_drops_panel')
     )
     bot.send_message(message.chat.id, text, reply_markup=keyboard)
@@ -112,6 +135,27 @@ def callback_query(call):
         drops(call.message)
     elif call.data == "view_sn":
         sn(call.message)
+    elif call.data == "buy_sn":
+        handle_purchase(call.message, 'Serial Number', 5)
+    elif call.data == "buy_1_drop":
+        handle_purchase(call.message, '1 Drop', 80)
+    elif call.data == "buy_3_drops":
+        handle_purchase(call.message, '3 Drops', 190)
+    elif call.data == "buy_drops_panel":
+        handle_purchase(call.message, 'Drops Panel', 800)
+
+def handle_purchase(message, service, price):
+    email = "customer@example.com"  # Modify this to get the actual email from the user if needed
+    order_id = f"ORD-{int(time.time())}"
+    description = f"Purchase of {service}"
+    
+    payment_response = create_oxapay_payment(description, price, order_id, email)
+    
+    if payment_response.get("status") == "success":
+        payment_url = payment_response.get("payment_url")
+        bot.send_message(message.chat.id, f"To complete your purchase, please proceed to the payment page: {payment_url}")
+    else:
+        bot.send_message(message.chat.id, "There was an issue creating the payment. Please try again later.")
 
 @bot.message_handler(commands=["start"])
 def start(message):
