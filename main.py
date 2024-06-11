@@ -170,6 +170,10 @@ ELPato Services allows you to view some of our offered services and their prices
 # Inicialização da aplicação Flask
 app = Flask(__name__)
 
+@app.route('/')
+def index():
+    return "Duck running for dollars $$$"
+
 # Função para processar callbacks de pagamento
 @app.route('/callback', methods=['POST'])
 def handle_callback():
@@ -202,8 +206,17 @@ def handle_callback():
         # Assinatura HMAC não é válida
         return 'Invalid HMAC signature', 400
 
-# Função para manter o bot Telegram e a aplicação Flask em execução
-def run_bot_and_flask():
+# Function to periodically send a request to keep the app alive
+def keep_alive():
+    while True:
+        try:
+            requests.get("https://bot-telegram-yoym.onrender.com")
+            time.sleep(300)  # wait for 5 minutes
+        except Exception as e:
+            print(f"An error occurred: {e}")
+
+# Start the bot and keep_alive functions in separate threads
+def start_bot():
     while True:
         try:
             bot.polling(none_stop=True, timeout=123)
@@ -211,7 +224,10 @@ def run_bot_and_flask():
             print(f"Bot polling failed: {e}")
             time.sleep(15)
 
-# Iniciar o bot Telegram e a aplicação Flask em threads separadas
+threading.Thread(target=start_bot).start()
+threading.Thread(target=keep_alive).start()
+
+# Run the Flask application on the port specified by the PORT environment variable
 if __name__ == "__main__":
-    threading.Thread(target=run_bot_and_flask).start()
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
