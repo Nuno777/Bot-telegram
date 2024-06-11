@@ -173,7 +173,16 @@ def start_bot():
 
 threading.Thread(target=start_bot).start()
 
-# Execute a aplicação Flask na porta especificada pela variável de ambiente PORT
+# Execute a aplicação Flask com Gunicorn
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    bind_address = "0.0.0.0"
+    workers = 4  # Número de processos de trabalho do Gunicorn
+    loglevel = "info"  # Nível de log do Gunicorn
+    accesslog = "-"  # Registrar no stdout
+
+    # Comando para executar a aplicação Flask com Gunicorn
+    command = f"gunicorn -b {bind_address}:{port} -w {workers} --log-level {loglevel} --access-logfile {accesslog} {__name__}:app"
+
+    # Execute o comando
+    os.system(command)
