@@ -34,7 +34,7 @@ def create_oxapay_payment(description, amount, order_id, email):
         'feePaidByPayer': 0,
         'underPaidCover': 2.5,
         'callbackUrl': 'https://oxapay.com/pay/71030100',
-        'returnUrl': 'https://example.com/success',
+        'returnUrl': payment_url,
         'description': description,
         'orderId': order_id,
         'email': email
@@ -152,7 +152,7 @@ def handle_purchase(message, service, price):
     payment_response = create_oxapay_payment(description, price, order_id, email)
     
     if payment_response.get("status") == "success":
-        payment_url = payment_response.get("payment_url")
+        payment_url = payment_response.get("https://oxapay.com/pay/71030100")
         bot.send_message(message.chat.id, f"To complete your purchase, please proceed to the payment page: {payment_url}")
     else:
         bot.send_message(message.chat.id, "There was an issue creating the payment. Please try again later.")
