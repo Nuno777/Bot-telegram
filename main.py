@@ -4,13 +4,13 @@ import requests
 import os
 from flask import Flask
 
-CHAVE_API = "7371479271:AAE6ECs-iIzeo_VV4BWMTq3Cg1jIK_uUHZs"
+API_KEY = "7371479271:AAE6ECs-iIzeo_VV4BWMTq3Cg1jIK_uUHZs"
 OXAPAY_API_KEY = "W30BRR-XEDNYM-T0Y1Y8-LWZT2D"
 OXAPAY_MERCHANT_ID = "077PVV-8FK004-PUGZLP-KDC407"
 
-bot = telebot.TeleBot(CHAVE_API)
+bot = telebot.TeleBot(API_KEY)
 
-# Função para obter os preços das criptomoedas
+# Function to get cryptocurrency prices
 def get_crypto_prices():
     url = "https://api.coingecko.com/api/v3/simple/price"
     params = {
@@ -22,17 +22,17 @@ def get_crypto_prices():
     return data
 
 @bot.message_handler(commands=["drops"])
-def drops(mensagem):
+def drops(message):
     text = """
     Drops
 
     1 Drop - $80
     3 Drops - $190
-    Drops Painel - $800"""
-    bot.send_message(mensagem.chat.id, text)
+    Drops Panel - $800"""
+    bot.send_message(message.chat.id, text)
 
 @bot.message_handler(commands=["sn"])
-def sn(mensagem):
+def sn(message):
     text = """
     Serial Numbers
 
@@ -48,54 +48,53 @@ def sn(mensagem):
     Philips
     Playstation
     Kitchenaid"""
-    bot.send_message(mensagem.chat.id, text)
+    bot.send_message(message.chat.id, text)
 
 @bot.message_handler(commands=["buy"])
-def buy(mensagem):
+def buy(message):
     text = """
     Buy Services
 
     Serial Number - $5
     1 Drop - $80
     3 Drops - $190
-    Drops Painel - $800
+    Drops Panel - $800
     
     To buy a service, use the command /purchase followed by the service name and quantity.
     Example: /purchase Drop 1
     """
-    bot.send_message(mensagem.chat.id, text)
-
+    bot.send_message(message.chat.id, text)
 
 @bot.message_handler(commands=["purchase"])
-def purchase(mensagem):
+def purchase(message):
     try:
-        command, service, quantity = mensagem.text.split()
+        command, service, quantity = message.text.split()
         quantity = int(quantity)
         
         if service.lower() == "drop":
             price = 80 * quantity
         elif service.lower() == "sn":
             price = 5 * quantity
-        elif service.lower() == "drops_painel":
+        elif service.lower() == "drops_panel":
             price = 800 * quantity
         else:
-            bot.send_message(mensagem.chat.id, "Service not recognized. Please try again.")
+            bot.send_message(message.chat.id, "Service not recognized. Please try again.")
             return
         
         payment_response = create_oxapay_payment(f"Purchase of {service}", price)
         
         if payment_response.get("status") == "success":
             payment_url = payment_response.get("payment_url")
-            bot.send_message(mensagem.chat.id, f"To complete your purchase, please proceed to the payment page: {payment_url}")
+            bot.send_message(message.chat.id, f"To complete your purchase, please proceed to the payment page: {payment_url}")
         else:
-            bot.send_message(mensagem.chat.id, "There was an issue creating the payment. Please try again later.")
+            bot.send_message(message.chat.id, "There was an issue creating the payment. Please try again later.")
     except ValueError:
-        bot.send_message(mensagem.chat.id, "Invalid command format. Use /purchase followed by the service name and quantity.")
+        bot.send_message(message.chat.id, "Invalid command format. Use /purchase followed by the service name and quantity.")
     except Exception as e:
-        bot.send_message(mensagem.chat.id, f"An error occurred: {str(e)}")
+        bot.send_message(message.chat.id, f"An error occurred: {str(e)}")
 
 @bot.message_handler(commands=["show"])
-def show(mensagem):
+def show(message):
     text = """
     Our services
 
@@ -106,10 +105,10 @@ def show(mensagem):
         types.InlineKeyboardButton('View Drops', callback_data='view_drops'),
         types.InlineKeyboardButton('View SN', callback_data='view_sn')
     )
-    bot.send_message(mensagem.chat.id, text, reply_markup=keyboard)
+    bot.send_message(message.chat.id, text, reply_markup=keyboard)
 
 @bot.message_handler(commands=["crypto"])
-def crypto(mensagem):
+def crypto(message):
     prices = get_crypto_prices()
     text = f"""
     Current cryptocurrency prices:
@@ -119,7 +118,7 @@ def crypto(mensagem):
     - Litecoin: ${prices['litecoin']['usd']}
     - Solana: ${prices['solana']['usd']}
     """
-    bot.send_message(mensagem.chat.id, text)
+    bot.send_message(message.chat.id, text)
 
 @bot.callback_query_handler(func=lambda call: True)
 def callback_query(call):
@@ -138,12 +137,12 @@ def callback_query(call):
         sn(call.message)
 
 @bot.message_handler(commands=["start"])
-def start(mensagem):
-    first_name = mensagem.from_user.first_name
+def start(message):
+    first_name = message.from_user.first_name
     text = f"""
 💵 Welcome {first_name} to ELPato Services
 
-ELPato Services allows you to show some services that we offer for a certain cost, where you can buy them.
+ELPato Services allows you to view some of our offered services and their prices. You can also make purchases directly through the bot.
 
     """
     keyboard = types.InlineKeyboardMarkup()
@@ -156,16 +155,16 @@ ELPato Services allows you to show some services that we offer for a certain cos
         types.InlineKeyboardButton('Support', callback_data='support')
     )
 
-    bot.send_message(mensagem.chat.id, text, reply_markup=keyboard)
+    bot.send_message(message.chat.id, text, reply_markup=keyboard)
 
-# Crie uma aplicação Flask para manter o bot vivo
+# Create a Flask application to keep the bot alive
 app = Flask(__name__)
 
 @app.route('/')
 def index():
     return "Duck running for dollars $$$"
 
-# Inicie o bot em uma thread separada
+# Start the bot in a separate thread
 import threading
 
 def start_bot():
@@ -173,16 +172,7 @@ def start_bot():
 
 threading.Thread(target=start_bot).start()
 
-# Execute a aplicação Flask com Gunicorn
+# Run the Flask application on the port specified by the PORT environment variable
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
-    bind_address = "0.0.0.0"
-    workers = 4  # Número de processos de trabalho do Gunicorn
-    loglevel = "info"  # Nível de log do Gunicorn
-    accesslog = "-"  # Registrar no stdout
-
-    # Comando para executar a aplicação Flask com Gunicorn
-    command = f"gunicorn -b {bind_address}:{port} -w {workers} --log-level {loglevel} --access-logfile {accesslog} {__name__}:app"
-
-    # Execute o comando
-    os.system(command)
+    app.run(host="0.0.0.0", port=port)
