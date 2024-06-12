@@ -27,7 +27,7 @@ def get_crypto_prices():
 def create_oxapay_payment(description, amount, order_id, email):
     url = 'https://api.oxapay.com/merchants/request'
     data = {
-        'merchant': OXAPAY_MERCHANT_ID,
+        'merchant': OXAPAY_API_KEY,
         'amount': amount,
         'currency': 'TRX',
         'lifeTime': 30,
