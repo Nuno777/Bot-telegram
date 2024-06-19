@@ -45,30 +45,19 @@ def create_oxapay_payment(description, amount, order_id, email):
 @bot.message_handler(commands=["drops"])
 def drops(message):
     text = """
-    Drops
+    Teste
 
-    1 Drop - $80
-    3 Drops - $190
-    Drops Panel - $800"""
+    Teste -$10
+    """
     bot.send_message(message.chat.id, text)
 
 @bot.message_handler(commands=["sn"])
 def sn(message):
     text = """
-    Serial Numbers
+    Shop
 
-    Bose
-    Dyson
-    Bissell
-    Booster Juice
-    GoPro
-    HP
-    Lenovo
-    Logitech
-    Ninja Kitchen
-    Philips
-    Playstation
-    Kitchenaid"""
+    Test
+    Test2"""
     bot.send_message(message.chat.id, text)
 
 @bot.message_handler(commands=["buy"])
@@ -76,19 +65,17 @@ def buy(message):
     text = """
     Buy Services
 
-    Serial Number - $5
-    1 Drop - $80
-    3 Drops - $190
-    Drops Panel - $800
+    Test - $5
+    test2 - $80
     """
     keyboard = types.InlineKeyboardMarkup()
     keyboard.row(
-        types.InlineKeyboardButton('Serial Number', callback_data='buy_sn'),
-        types.InlineKeyboardButton('1 Drop', callback_data='buy_1_drop')
+        types.InlineKeyboardButton('Teste', callback_data='buy_sn'),
+        types.InlineKeyboardButton('Test1', callback_data='buy_1_drop')
     )
     keyboard.row(
-        types.InlineKeyboardButton('3 Drops', callback_data='buy_3_drops'),
-        types.InlineKeyboardButton('Drops Panel', callback_data='buy_drops_panel')
+        types.InlineKeyboardButton('Test2', callback_data='buy_3_drops'),
+        types.InlineKeyboardButton('Tes3', callback_data='buy_drops_panel')
     )
     bot.send_message(message.chat.id, text, reply_markup=keyboard)
 
@@ -97,8 +84,8 @@ def show(message):
     text = """
     Our services
 
-    Residential Drops USA/CA
-    Serial Numbers"""
+    Test
+    Shop"""
     keyboard = types.InlineKeyboardMarkup()
     keyboard.row(
         types.InlineKeyboardButton('View Drops', callback_data='view_drops'),
@@ -129,20 +116,20 @@ def callback_query(call):
     elif call.data == "crypto":
         crypto(call.message)
     elif call.data == "support":
-        support_url = "https://t.me/ElPato_Drops"
+        support_url = "https://t.me/Nseven777"
         bot.send_message(call.message.chat.id, f"Click [here]({support_url}) to chat with support.", parse_mode="Markdown")
     elif call.data == "view_drops":
         drops(call.message)
     elif call.data == "view_sn":
         sn(call.message)
     elif call.data == "buy_sn":
-        handle_purchase(call.message, 'Serial Number', 5)
+        handle_purchase(call.message, 'test', 5)
     elif call.data == "buy_1_drop":
-        handle_purchase(call.message, '1 Drop', 80)
+        handle_purchase(call.message, 'test1', 10)
     elif call.data == "buy_3_drops":
-        handle_purchase(call.message, '3 Drops', 190)
+        handle_purchase(call.message, 'test2', 30)
     elif call.data == "buy_drops_panel":
-        handle_purchase(call.message, 'Drops Panel', 800)
+        handle_purchase(call.message, 'test3', 0)
 
 def handle_purchase(message, service, price):
     email = "customer@example.com"  # Modify this to get the actual email from the user if needed
@@ -161,9 +148,9 @@ def handle_purchase(message, service, price):
 def start(message):
     first_name = message.from_user.first_name
     text = f"""
-💵 Welcome {first_name} to ELPato Services
+💵 Welcome {first_name} to DX Services
 
-ELPato Services allows you to view some of our offered services and their prices. You can also make purchases directly through the bot.
+DX Services allows you to view some of our offered services and their prices. You can also make purchases directly through the bot.
 
     """
     keyboard = types.InlineKeyboardMarkup()
